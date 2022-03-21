@@ -1,0 +1,45 @@
+@charset "UTF-8";
+/* login & join */
+.login, .join {
+    width: 70%;
+    padding: 15px;
+}
+
+.login {
+    height: 350px;
+    margin: 13.8%;
+}
+
+.join {
+    height: 500px;
+    margin: 8.04% 15%;
+}
+
+.join-area {
+    margin-bottom: 10px;
+}
+
+.rank-table th,
+.rank-table td {
+    width: 5%;
+}
+
+.clan-game table th,
+.clan-management table th,
+.clan-game table td,
+.clan-management table td {
+    width: 20%;
+}
+
+.record-form {
+    display: flex;
+}
+
+.record-form > div {
+    margin: 0 15px;
+}
+
+.clan-notice .card {
+    margin: 15px;
+    border: 1px solid #333;
+}
