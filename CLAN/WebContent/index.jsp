@@ -1,3 +1,5 @@
+<%@page import="member.MemberDAO"%>
+<%@page import="java.io.PrintWriter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -21,6 +23,32 @@
 
 </head>
 <body>
+<%
+	String memberID = null;
+	if(session.getAttribute("memberID") != null) {
+		memberID = (String) session.getAttribute("memberID");
+	}
+	/* if(memberID == null) {
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('로그인을 해주세요')");
+		script.println("location.href = 'pages/dropmenu/login.jsp'");
+		script.println("</script>");
+		script.close();
+		return;
+	} */
+	
+	/* boolean emailChecked = new MemberDAO().getMemberEmailChecked(memberID);
+	
+	if(emailChecked == false) {
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("location.href = 'pages/dropmenu/emailSendConfirm.jsp'");
+		script.println("</script>");
+		script.close();
+		return;
+	} */
+%>
 <!--[if lt IE 7]>
 	<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
 <![endif]-->
@@ -49,11 +77,24 @@
 						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 							회원관리
 						</a>
+						<%
+							if(memberID == null) {
+						%>
 						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<li><a class="dropdown-item" href="./pages/action/login.jsp">Sign in</a></li>
-							<li><a class="dropdown-item" href="./pages/action/join.jsp">Sign up</a></li>
-							<li><a class="dropdown-item" href="./pages/menu/master.jsp">클랜관리</a></li>
+							<li><a class="dropdown-item" href="./pages/dropmenu/login.jsp">Sign in</a></li>
+							<li><a class="dropdown-item" href="./pages/dropmenu/join.jsp">Sign up</a></li>
 						</ul>
+						<%
+							} else {
+						%>
+						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<li><a class="dropdown-item" href="./pages/dropmenu/login.jsp">정보수정</a></li>
+							<li><a class="dropdown-item" href="./pages/menu/master.jsp">클랜관리</a></li>
+							<li><a class="dropdown-item" href="./pages/action/logoutAction.jsp">로그아웃</a></li>
+						</ul>
+						<%
+							}
+						%>
 					</li>
 				</ul>
 				<form class="d-flex">
@@ -279,6 +320,47 @@
 		</div>
 	</div>
 </footer>
+<%
+	String messageContent = null;
+	if(session.getAttribute("messageContent") != null) {
+		messageContent = (String) session.getAttribute("messageContent");
+	}
+	
+	String messageType = null;
+	if(session.getAttribute("messageType") != null) {
+		messageType = (String) session.getAttribute("messageType");
+	}
+	
+	if(messageContent != null) {
+%>
+		<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="vertical-alignment-helper">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header card-header <% if(messageType.equals("오류 메시지")) out.println("bg-warning text-dark"); else out.println("bg-success text-white"); %>">
+							<h4 class="modal-title">
+								<%= messageType %>
+							</h4>
+							<button type="button" class="close" aria-label="Close">
+							  	<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<%= messageContent %>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary" data-dismiss="modal">확인</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+<%
+		/* messageContent와 messageType은 서버로 부터 받은 어떠한 세션 값이다 */
+		session.removeAttribute("messageContent");
+		session.removeAttribute("messageType");
+	}
+%>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 <script src="js/main.js"></script>

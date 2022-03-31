@@ -20,6 +20,17 @@
 
 </head>
 <body>
+<%
+	String memberID = null;
+	if(session.getAttribute("memberID") != null) {
+		memberID = (String) session.getAttribute("memberID");
+	}
+	
+	int pageNumber = 1;
+	if(request.getParameter("pageNumber") != null) {
+		pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
+	}
+%>
 <!--[if lt IE 7]>
 	<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
 <![endif]-->
@@ -49,9 +60,20 @@
 							회원관리
 						</a>
 						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<li><a class="dropdown-item" href="../action/login.jsp">Sign in</a></li>
-							<li><a class="dropdown-item" href="../action/join.jsp">Sign up</a></li>
-							<li><a class="dropdown-item" href="master.jsp">클랜관리</a></li>
+							<%
+								if(memberID == null) {
+							%>
+								<li><a class="dropdown-item" href="../dropmenu/login.jsp">Sign in</a></li>
+								<li><a class="dropdown-item" href="../dropmenu/join.jsp">Sign up</a></li>
+							<%
+								} else {
+							%>
+								<li><a class="dropdown-item" href="../dropmenu/login.jsp">정보수정</a></li>
+								<li><a class="dropdown-item" href="master.jsp">클랜관리</a></li>
+								<li><a class="dropdown-item" href="../action/logoutAction.jsp">로그아웃</a></li>
+							<%
+								}
+							%>
 						</ul>
 					</li>
 				</ul>

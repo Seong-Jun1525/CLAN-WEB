@@ -1,4 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="member.MemberDTO"%>
+<%@ page import="member.MemberDAO"%>
+<%@ page import="java.io.PrintWriter"%>
+<%@ page import="java.util.ArrayList"%>
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -20,6 +24,17 @@
 
 </head>
 <body>
+<%
+	String memberID = null;
+	if(session.getAttribute("memberID") != null) {
+		memberID = (String) session.getAttribute("memberID");
+	}
+	
+	int pageNumber = 1;
+	if(request.getParameter("pageNumber") != null) {
+		pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
+	}
+%>
 <!--[if lt IE 7]>
 	<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
 <![endif]-->
@@ -49,9 +64,20 @@
 							회원관리
 						</a>
 						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-							<li><a class="dropdown-item" href="../action/login.jsp">Sign in</a></li>
-							<li><a class="dropdown-item" href="../action/join.jsp">Sign up</a></li>
+						<%
+							if(memberID == null) {
+						%>
+							<li><a class="dropdown-item" href="../dropmenu/login.jsp">Sign in</a></li>
+							<li><a class="dropdown-item" href="../dropmenu/join.jsp">Sign up</a></li>
+						<%
+							} else {
+						%>
+							<li><a class="dropdown-item" href="../dropmenu/login.jsp">정보수정</a></li>
 							<li><a class="dropdown-item" href="master.jsp">클랜관리</a></li>
+							<li><a class="dropdown-item" href="../action/logoutAction.jsp">로그아웃</a></li>
+						<%
+							}
+						%>
 						</ul>
 					</li>
 				</ul>
@@ -64,87 +90,114 @@
 	</nav>
 </header>
 
-      <section class="menu-section">
-          <div class="clan-member">
+<section class="menu-section">
+	<div class="clan-member">
 		<div class="container">
 			<div class="section-title">
 				<h3><i class="fa-solid fa-user-group"></i> <span>clan member list</span></h3>
 			</div>
 			<table class="table table-dark table-hover table-striped">
 				<thead>
-				<tr>
-					<th scope="col">Num</th>
-					<th scope="col">ID</th>
-					<th scope="col">Tribe</th>
-					<th scope="col">Ladder</th>
-				</tr>
+					<tr>
+						<th scope="col">Num</th>
+						<th scope="col">ID</th>
+						<th scope="col">Tribe</th>
+						<th scope="col">Ladder</th>
+					</tr>
 				</thead>
 				<tbody>
-				<tr>
-					<th scope="row">1</th>
-					<td><button type="button" class="btn btn-sm btn-primary" data-bs-toggle="popover" title="전적" data-bs-content="0전 0승 0패 승률 0%">33UpGoliath</button></td>
-					<td>T</td>
-					<td>C</td>
-				</tr>
-				<tr>
-					<th scope="row">2</th>
-					<td>Jacob</td>
-					<td>Z</td>
-					<td>D</td>
-				</tr>
-				<tr>
-					<th scope="row">3</th>
-					<td>Larry the Bird</td>
-					<td>P</td>
-					<td>A</td>
-				</tr>
-				<tr>
-					<th scope="row">4</th>
-					<td>Mark</td>
-					<td>T</td>
-					<td>S</td>
-				</tr>
-				<tr>
-					<th scope="row">5</th>
-					<td>Jacob</td>
-					<td>Z</td>
-					<td>B</td>
-				</tr>
-				<tr>
-					<th scope="row">6</th>
-					<td>Larry the Bird</td>
-					<td>P</td>
-					<td>B</td>
-				</tr>
-				<tr>
-					<th scope="row">7</th>
-					<td>Mark</td>
-					<td>T</td>
-					<td>B</td>
-				</tr>
-				<tr>
-					<th scope="row">8</th>
-					<td>Jacob</td>
-					<td>Z</td>
-					<td>B</td>
-				</tr>
-				<tr>
-					<th scope="row">9</th>
-					<td>Larry the Bird</td>
-					<td>P</td>
-					<td>B</td>
-				</tr>
-				<tr>
-					<th scope="row">10</th>
-					<td>Larry the Bird</td>
-					<td>P</td>
-					<td>B</td>
-				</tr>
+					<%
+						int total = 0, win = 0, lose = 0;
+						double rate;
+						String tribe, win2;
+						MemberDAO memberDAO = new MemberDAO();
+						ArrayList<MemberDTO> list = memberDAO.getList(pageNumber);
+						for(int i = 0; i < list.size(); i++) {
+							if(list.get(i).getTotalScore() == 0) {
+								total = 0;
+								win = 0;
+								lose = 0;
+								rate = 0;
+							}
+							else {
+								total = list.get(i).getTotalScore();
+								win = list.get(i).getPScore() + list.get(i).getTScore() + list.get(i).getZScore();
+								lose = total - win;
+								rate = win * 0.01 * 100;
+							}
+							tribe = list.get(i).getTribe();
+					%>
+							<tr>
+								<td><%= list.get(i).getNum() %></td>
+								<%
+									if(tribe.equals("P")) {
+								%>
+										<td><button type="button" style="width: 100px; text-align: center;" class="btn btn-sm btn-warning" data-bs-toggle="popover" title="전적" data-bs-content="<%= total %>전 <%= win %>승 <%= lose %>패 승률 <%= rate %>%"><%= list.get(i).getMemberID() %></button></td>
+										<td><img src="../../img/protoss-icon.png" style="width: 30px; height: 35px;"></td>
+								<%
+									}
+								%>
+								<%
+									if(tribe.equals("T")) {
+								%>
+										<td><button type="button" style="width: 100px; text-align: center;" class="btn btn-sm btn-primary" data-bs-toggle="popover" title="전적" data-bs-content="<%= total %>전 <%= win %>승 <%= lose %>패 승률 <%= rate %>%"><%= list.get(i).getMemberID() %></button></td>
+										<td><img src="../../img/terran-icon.png" style="width: 30px; height: 35px;"></td>
+								<%
+									}
+								%>
+								<%
+									if(tribe.equals("Z")) {
+								%>
+										<td><button type="button" style="width: 100px; text-align: center;" class="btn btn-sm btn-danger" data-bs-toggle="popover" title="전적" data-bs-content="<%= total %>전 <%= win %>승 <%= lose %>패 승률 <%= rate %>%"><%= list.get(i).getMemberID() %></button></td>
+										<td><img src="../../img/zerg-icon.png" style="width: 30px; height: 35px;"></td>
+								<%
+									}
+								%>
+								<td><%= list.get(i).getLadderScore() %></td>
+							</tr>
+					<%
+						}
+					%>
 				</tbody>
 			</table>
 		</div>
 	</div>
-      </section>
+</section>
+
+<%-- <ul class="pagination justify-content-center mt-3">
+	<li class="page-item">
+	<%
+		if(pageNumber <= 0) {
+	%>
+		<a class="page-link disabled">이전</a>
+	<%
+		}
+		else {
+	%>
+		<a class="page-link" href="./index.jsp?lectureDivide=<%= URLEncoder.encode(lectureDivide, "UTF-8") %>
+			&searchType=<%= URLEncoder.encode(searchType, "UTF-8") %>&search=<%= URLEncoder.encode(search, "UTF-8") %>
+			&pageNumber=<%= pageNumber - 1 %>">이전</a>
+	<%
+		}
+	%>
+	</li>
+	<li>
+	<%
+		if(evaluationList.size() < 6) {
+	%>
+		<a class="page-link disabled">다음</a>
+	<%
+		}
+		else {
+	%>
+		<a class="page-link" href="./index.jsp?lectureDivide=<%= URLEncoder.encode(lectureDivide, "UTF-8") %>
+			&searchType=<%= URLEncoder.encode(searchType, "UTF-8") %>&search=<%= URLEncoder.encode(search, "UTF-8") %>
+			&pageNumber=<%= pageNumber + 1 %>">다음</a>
+	<%
+		}
+	%>
+	</li>
+</ul> --%>
 
 <footer class="py-3">
 	<div class="container">

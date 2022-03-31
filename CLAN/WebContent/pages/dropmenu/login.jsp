@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.io.PrintWriter"%>
+<%@ page import="member.MemberDAO" %>
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -21,6 +23,21 @@
 
 </head>
 <body>
+<%
+	String memberID = null;
+	if(session.getAttribute("memberID") != null) {
+		memberID = (String) session.getAttribute("memberID");
+	}
+	if(memberID != null) {
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('로그인이 된 상태입니다.')");
+		script.println("location.href = '../../index.jsp'");
+		script.println("</script>");
+		script.close();
+		return;
+	}
+%>
 <!--[if lt IE 7]>
 	<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
 <![endif]-->
@@ -52,7 +69,6 @@
 						<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 							<li><a class="dropdown-item active" href="login.jsp">로그인</a></li>
 							<li><a class="dropdown-item" href="join.jsp">회원가입</a></li>
-							<li><a class="dropdown-item" href="../menu/master.jsp">클랜관리</a></li>
 						</ul>
 					</li>
 				</ul>
@@ -72,13 +88,13 @@
                       <h3><i class="fa-solid fa-user"></i> <span>Sign in</span></h3>
                   </div>
                   <div class="section-content">
-                      <form action="" method="post" name="login-form">
+                      <form action="../action/loginAction.jsp" method="post" name="login-form">
                           <div class="form-floating mb-3">
-                              <input type="email" class="form-control" id="memberEmail" placeholder="name@example.com">
-                              <label for="floatingInput">Email address</label>
+                              <input type="text" class="form-control" name="memberID" id="memberID" placeholder="ID">
+                              <label for="floatingInput">ID</label>
                           </div>
                           <div class="form-floating">
-                              <input type="password" class="form-control" id="memberPW" placeholder="Password">
+                              <input type="password" class="form-control" name="memberPW" id="memberPW" placeholder="Password">
                               <label for="floatingPassword">Password</label>
                           </div>
                           <button type="submit" class="float-end mt-3 btn btn-primary">Sign in</button>

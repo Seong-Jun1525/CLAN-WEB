@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="bbs.BbsDTO"%>
-<%@ page import="bbs.BbsDAO"%>
-<%@ page import="java.util.ArrayList"%>
+<%@ page import="member.MemberDAO"%>
+<%@ page import="member.MemberDTO"%>
 <!DOCTYPE html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -22,6 +21,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
 </head>
+<body>
 <%
 	String memberID = null;
 	if(session.getAttribute("memberID") != null) {
@@ -35,21 +35,20 @@
 		return;
 	}
 	
-	String pageNumber = "1";
-	if(request.getParameter("pageNumber") != null) {
-		pageNumber = request.getParameter("pageNumber");
+	String bbsID = null;
+	
+	if(request.getParameter("bbsID") != null) {
+		bbsID = (String) request.getParameter("bbsID");
 	}
 	
-	try {
-		Integer.parseInt(pageNumber);
-	} catch(Exception e) {
+	if(bbsID == null || bbsID.equals("")) {
 		session.setAttribute("messageType", "오류 메시지");
-		session.setAttribute("messageContent", "페이지 번호가 잘못되었습니다.");
+		session.setAttribute("messageContent", "게시물을 선택해주세요.");
 		response.sendRedirect("notice.jsp");
 		return;
 	}
 	
-	ArrayList<BbsDTO> bbsList = new BbsDAO().getList(pageNumber);
+	MemberDTO member = new MemberDAO().getMember(memberID);
 %>
 <!--[if lt IE 7]>
 	<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
@@ -95,137 +94,51 @@
 	</nav>
 </header>
 
-<section class="menu-section">
-	<div class="clan-notice">
-		<div class="container">
-			<div class="section-title">
-				<h3><i class="fa-solid fa-bookmark"></i> <span>clan notice</span></h3>
-			</div>
-			<div class="section-content">
-				<table class="table table-dark table-hover table-striped">
-				<thead>
-					<tr>
-						<th scope="col">Num</th>
-						<th scope="col">Title</th>
-						<th scope="col">Writer</th>
-						<th scope="col">Date</th>
-						<th scope="col">Hit</th>
-					</tr>
-				</thead>
-				<tbody>
-					<%
-						for (int i = 0; i < bbsList.size(); i++) {
-							BbsDTO bbs = bbsList.get(i);
-					%>
-								<tr>
-									<td><%= bbs.getBbsID() %></td>
-									<td style="text-align: left;">
-										<a href="bbsShow.jsp?bbsID=<%= bbs.getBbsID() %>" style="text-decoration: none; color: inherit;">
-								<%
-										for (int j = 0; j < bbs.getBbsLevel(); j++) {
-								%>
-											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8.22 2.97a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06l2.97-2.97H3.75a.75.75 0 010-1.5h7.44L8.22 4.03a.75.75 0 010-1.06z"></path></svg>
-								<%
-										}
-										if(bbs.getBbsAvailable() == 0) {
-								%>
-											(삭제된 게시물입니다.)
-								<%
-										} else {
-								%>
-											<%= bbs.getBbsTitle() %>
-								<%
-										}
-								%>
-										</a>
-									</td>
-									<td><%= bbs.getMemberID() %></td>
-									<td><%= bbs.getBbsDate() %></td>
-									<td><%= bbs.getBbsHit() %></td> 
-								</tr>
-					<%
-						}
-					%>
-					
-					<tr>
-						<td colspan="5 ">
-							<a class="btn btn-primary float-end" href="bbsWrite.jsp" type="submit">글쓰기</a>
-							<ul class="pagination" style="margin: 0 auto;">
-							<%
-								int startPage = (Integer.parseInt(pageNumber) / 10) * 10 + 1;
-								if(Integer.parseInt(pageNumber) % 10 == 0) startPage -= 10;
-								int targetPage = new BbsDAO().targetPage(pageNumber);
-								if(startPage != 1) {
-							%>
-									<li><a href="notice.jsp?pageNumber=<%= startPage - 1 %>" class="btn btn-outline-light">이전</a></li>
-							<%
-								}
-								else {
-							%>
-									<li><a href="#" class="btn btn-outline-light">이전</a></li>
-							<%
-								}
-								for(int i = startPage; i < Integer.parseInt(pageNumber); i++) {
-							%>
-									<li><a href="notice.jsp?pageNumber=<%= i %>" class="btn btn-secondary"><%= i %></a></li>
-							<%		
-								}
-							%>
-								<li class="active"><a href="notice.jsp?pageNumber=<%= pageNumber %>" class="btn btn-secondary"><%= pageNumber %></a></li>
-							<%
-								for(int i = Integer.parseInt(pageNumber) + 1; i <= targetPage + Integer.parseInt(pageNumber); i++) {
-									if(i < startPage + 10) {
-							%>
-										<li><a href="notice.jsp?pageNumber=<%= i %>" class="btn btn-secondary"><%= i %></a></li>
-							<%
-									}
-								}
-								if(targetPage + Integer.parseInt(pageNumber) > startPage + 9) {
-							%>
-									<li><a href="notice.jsp?pageNumber=<%= startPage + 10 %>" class="btn btn-success">다음</a></li>
-							<%
-								}
-								else {
-							%>
-									<li><a href="#" class="btn btn-success">다음</a></li>
-							<%
-								}
-							%>
-							</ul>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-			</div>
-		</div>
-	</div>
-</section>
+<div class="container">
+	<form method="post" action="../boardReply" enctype="multipart/form-data">
+		<table class="table table-bordered table-hover" style="text-align: center; border: 1px solid #ddd;">
+			<thead>
+				<tr>
+					<th colspan="3"><h4>답변 작성 양식</h4></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td style="width: 120px"><h5>아이디</h5></td>
+					<td><h5><%= member.getMemberID() %></h5>
+					<input type="hidden" name="memberID" value="<%= member.getMemberID() %>">
+					<input type="hidden" name="bbsID" value="<%= bbsID %>"></td>
+	   		    </tr>
+				<tr>
+					<td style="width: 120px"><h5>글 제목</h5></td>
+					<td><input class="form-control" type="text" maxlength="50" name="bbsTitle" placeholder="글 제목을 입력하세요."></td>
+	   		    </tr>
+				<tr>
+					<td style="width: 120px"><h5>글 내용</h5></td>
+					<td><textarea class="form-control" rows="10" name="bbsContent" maxlength="2048" placeholder="글 내용을 입력하세요."></textarea></td>
+	   		    </tr>
+				<tr>
+					<td><h5>파일 업로드</h5></td>
+					<!-- onkeyup은 어떤 메시지를 입력할 때마다 실행됨 -->
+					<td colspan="2">
+						<input type="file" name="boardFile" class="file">
+						<div class="input-group col-12">
+							<span class="input-group-text"><i class="fas fa-image"></i></span>
+							<input type="text" class="form-control form-control-lg" disabled placeholder="파일을 업로드 하세요.">
+							<span class="input-group-btn">
+								<button class="browse btn btn-primary form-control-lg" type="button"><i class="fas fa-search"></i>파일 찾기</button>
+							</span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td style="text-align: left;" colspan="3"><h5 style="color: red;"></h5><button type="submit" class="btn btn-info float-right">등록하기</button></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</div>
 
-<footer class="py-3">
-	<div class="container">
-		<ul class="nav justify-content-center border-bottom pb-3 mb-3">
-			<li class="nav-item">
-				<a class="nav-link px-2 text-muted" href="notice.jsp">공지사항</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link px-2 text-muted active" href="member.jsp">클랜원</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link px-2 text-muted" href="rank.jsp">클랜랭킹</a>
-			</li>
-			<li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
-			<li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
-		</ul>
-		<div class="col-md-4 align-items-center">
-			<p class="text-center text-muted">© 2022 Seong Jun</p>
-			<ul class="nav col-md-4 justify-content-center list-unstyled">
-				<li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-github-square"></i></a></li>
-				<li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-instagram-square"></i></a></li>
-				<li class="ms-3"><a class="text-muted" href="#"><i class="fa-solid fa-desktop"></i></a></li>
-			</ul>
-		</div>
-	</div>
-</footer>
 <%
 	String messageContent = null;
 	if(session.getAttribute("messageContent") != null) {
@@ -268,10 +181,6 @@
 	}
 %>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-<script type="text/javascript">
-
-</script>
 </body>
 </html>
